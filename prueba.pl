@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
+use Getopt::Long;
 use CGI::Carp qw(fatalsToBrowser);
-
 use LWP::UserAgent;
 use HTTP::Request;
 
@@ -9,20 +9,28 @@ use HTTP::Request;
 my $query_mailto = '';
 my $query_mailfrom = '';
 my $query_mail = ''; 
+my $url = "https://www.wikileaks.org/hackingteam/emails/";
 
-my $tipo_campo = $ARGV[0];
-my $texto = $ARGV[1];
+#opciones 
+GetOptions('t_mailto=s' => \$query_mailto, #string 
+           't_mailfrom=s'   => \$query_mailfrom, #string
+           't_mailbody=s' => \$query_mail) #string 
+or die("type: perl prueba.pl\n -t_mailto [campo_texto]\n -t_mailfrom [campo_texto\n -t_mailbody [campo_texto]\n");
 
 #conexión con la página web
 my $ua = LWP::UserAgent->new;
-$ua->agent("Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt)");
-
-my $req = HTTP::Request->new(POST => "https://www.wikileaks.org/hackingteam/emails/");
+my $req = HTTP::Request->new(POST => $url);
 $req->content_type('application/x-www-form-urlencoded');
-$req->content(query_mailfrom);
 
+#sustitución de los campos
+$req->content('q=' . $query_mail . '&' . 
+			  'mfrom=' . $query_mailfrom . '&' . 
+			  'mto=' . $query_mailto);
+
+#solicitud de los datos a la página web
 my $response = $ua->request($req);
 my $content = $response->content(); #contenido de la respuesta
 
+#impresión de los resultados
 print "Content-type: text/html\n\n";
 print $content;

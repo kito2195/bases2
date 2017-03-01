@@ -1,20 +1,22 @@
 #!/usr/bin/perl -w
+
 use strict;
 use Getopt::Long;
 use CGI::Carp qw(fatalsToBrowser);
 use LWP::UserAgent;
 use HTTP::Request;
 
+if(@ARGV == 2){
 #campos a sustituir en la pagina web
-my $query_mailto = '';
-my $query_mailfrom = '';
-my $query_mail = ''; 
+my $mailto = ''; #aka 'mto=''
+my $mailfrom = ''; #aka 'mfrom=
+my $mailq = ''; #aka 'q='
 my $url = "https://www.wikileaks.org/hackingteam/emails/";
 
 #opciones 
-GetOptions('t_mailto=s' => \$query_mailto, #string 
-           't_mailfrom=s'   => \$query_mailfrom, #string
-           't_mailbody=s' => \$query_mail) #string 
+GetOptions('t_mailto=s' => \$mailto, #string 
+           't_mailfrom=s'   => \$mailfrom, #string
+           't_mailbody=s' => \$mailq) #string 
 or die("type: perl prueba.pl\n -t_mailto [campo_texto]\n -t_mailfrom [campo_texto\n -t_mailbody [campo_texto]\n");
 
 #conexión con la página web
@@ -23,14 +25,23 @@ my $req = HTTP::Request->new(POST => $url);
 $req->content_type('application/x-www-form-urlencoded');
 
 #sustitución de los campos
-$req->content('q=' . $query_mail . '&' . 
-			  'mfrom=' . $query_mailfrom . '&' . 
-			  'mto=' . $query_mailto);
+$req->content('q=' . $mailq . '&' . 
+			  'mfrom=' . $mailfrom . '&' . 
+			  'mto=' . $mailto);
 
-#solicitud de los datos a la página web
+#solicitud de los datos a la página web con los campos solicitados
 my $response = $ua->request($req);
-my $content = $response->content(); #contenido de la respuesta
+
+#contenido de la respuesta
+my $content = $response->content();
 
 #impresión de los resultados
-print "Content-type: text/html\n\n";
+print ("Content-type: text/html\n\n");
 print $content;
+}else{
+	print("type: perl cliente.pl\n"); 
+	print("options: \n");
+	print(" -t_mailfrom [text]\n");
+	print(" -t_mailto [text]\n");
+	print(" -t_mailbody [text]\n");
+}

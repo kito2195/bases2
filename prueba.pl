@@ -5,6 +5,8 @@ use Getopt::Long;
 use CGI::Carp qw(fatalsToBrowser);
 use LWP::UserAgent;
 use HTTP::Request;
+use HTML::TableExtract;
+
 
 if(@ARGV == 2){
 #campos a sustituir en la pagina web
@@ -35,9 +37,19 @@ my $response = $ua->request($req);
 #contenido de la respuesta
 my $content = $response->content();
 
+
+my $table = HTML::TableExtract->new(headers => [qw(Doc # Date Suject From To)],);
+
+$table->parse($content);
+
+#Imprimir en terminal
+foreach my $row($table->rows){
+	print join("\t",@$row), "\n";
+}
+
 #impresión de los resultados
 print ("Content-type: text/html\n\n");
-print $content;
+#print $content;
 }else{
 	print("type: perl cliente.pl\n"); 
 	print("options: \n");
